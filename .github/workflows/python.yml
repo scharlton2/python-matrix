@@ -15,8 +15,8 @@ on:
 
 env:
   PYTHON_INSTALL_DIR: C:\Python38-x64
-  PYTHON_DOWNLOAD_3_8_10: https://github.com/actions/python-versions/releases/download/3.8.10-117959/python-3.8.10-win32-x64.zip
-  PYTHON_DOWNLOAD_3_8_6: https://github.com/actions/python-versions/releases/download/3.8.6-117961/python-3.8.6-win32-x64.zip
+  # PYTHON_DOWNLOAD_3_8_10: https://github.com/actions/python-versions/releases/download/3.8.10-117959/python-3.8.10-win32-x64.zip
+  # PYTHON_DOWNLOAD_3_8_6: https://github.com/actions/python-versions/releases/download/3.8.6-117961/python-3.8.6-win32-x64.zip
 
 jobs:
   build:
@@ -24,25 +24,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-2019, windows-latest]
-        python-version: ['3.8.10']
+        # os: [ubuntu-latest, macos-latest, windows-2019, windows-latest]
+        os: [windows-2019, windows-latest]
+        python-version: ['3.8.6', '3.8.10']
         python-platform: ['amd64']
-        exclude:
-          - os: macos-latest
-            python-version: '3.8.10'
-          - os: ubuntu-latest
-            python-version: '3.8.10'
+        # exclude:
+        #   - os: macos-latest
+        #     python-version: '3.8.10'
+        #   - os: ubuntu-latest
+        #     python-version: '3.8.10'
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: get version
-        run: python --version
+      # - uses: actions/checkout@v3
+      # - name: Set up Python
+      #   uses: actions/setup-python@v3
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
+      # - name: get version
+      #   run: python --version
 
-      - name: list libs
-        run: python -c "import sysconfig;import os; print(os.listdir(sysconfig.get_config_vars('prefix')[0] + '/libs'))"
+      # - name: list libs
+      #   run: python -c "import sysconfig;import os; print(os.listdir(sysconfig.get_config_vars('prefix')[0] + '/libs'))"
 
       - name: Cache (Python)
         uses: actions/cache@v1.1.2
@@ -64,7 +65,8 @@ jobs:
         run: |
           Start-Process -FilePath "${{ runner.workspace }}\dl\python-${{ matrix.python-version }}-${{ matrix.python-platform }}.exe" -ArgumentList "/quiet Include_debug=1 Include_dev=1 Include_lib=1 Include_pip=1 PrependPath=1 CompileAll=1 InstallAllUsers=0 TargetDir=${{ env.PYTHON_INSTALL_DIR }}\" -Verb runas -Wait
         # if: matrix.arch == 'x64' && steps.cache-python.outputs.cache-hit != 'true'
-        if: steps.cache-python.outputs.cache-hit != 'true'
+        # if: steps.cache-python.outputs.cache-hit != 'true'
+        if: runner.os == 'Windows' && steps.cache-python.outputs.cache-hit != 'true'
         shell: pwsh
 
       - name: Display Python version
