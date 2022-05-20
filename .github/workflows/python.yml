@@ -95,7 +95,7 @@ jobs:
         id: cache-python
         with:
           path: '${{ env.PYTHON_INSTALL_DIR }}\'
-          key: 'Windows-PythonCache-v${{ env.PYTHON_VERSION }}-amd64-dbg'
+          key: 'Windows-PythonCache-v${{ env.PYTHON_VERSION }}-amd64'
 
       - name: Download Python
         uses: carlosperate/download-file-action@v1.0.3
@@ -105,6 +105,12 @@ jobs:
          file-name: 'python-${{ env.PYTHON_VERSION }}-amd64.exe'
          location: '${{ runner.workspace }}\dl\'
         if: steps.cache-python.outputs.cache-hit != 'true'
+
+      - name: Install Python debug (x64) # we need debug binaries and precompiled standard libraries
+        run: |
+          Start-Process -FilePath "${{ runner.workspace }}\dl\python-${{ env.PYTHON_VERSION }}-amd64.exe" -ArgumentList "/quiet Include_debug=1 Include_dev=1 Include_lib=1 Include_pip=1 PrependPath=1 CompileAll=1 InstallAllUsers=0 TargetDir=${{ env.PYTHON_INSTALL_DIR }}\" -Verb runas -Wait
+        if: runner.os == 'Windows' && steps.cache-python.outputs.cache-hit != 'true'
+        shell: pwsh
 
       - name: Display Python version
         run: ${{ env.PYTHON_INSTALL_DIR }}\python.exe -c "import sys; print(sys.version)"
